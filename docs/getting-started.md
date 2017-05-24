@@ -47,20 +47,15 @@ ts_plot(ica17, "hours") +
                     width = 7, height = 5, units = "in")
 ```
 
-
-![img/ica17tweets.png]
-
-
 <p align="center">
 <img src="img/ica17tweets.png" alt="ica17tweets">
 </p>
 
-The bundled functionality should only be thought of as a test
-drive. There's no guarantee it will work as expected. Instead, users
-should create their own Twitter API tokens. I've laid out step by step
-instructions in the
-[auth vignette](https://mkearney.github.io/rtweet/articles/auth.html).
-This vignette also includes instructions for saving your token as an
-environment variable, which means you'll never have to worry about API
-authorization again (at least on the machine you're currently using)!
-
+The built-in token is token is only meant to be used for test
+drives. There's no guarantee it will work as expected. Instead, users
+should create their own Twitter API tokens. For step-by-step
+instructions on how to create and manage your Twitter API token, see
+the ["auth" vignette](https://mkearney.github.io/rtweet/articles/auth.html).
+The vignette also includes instructions for saving your token as an
+environment variable. This allows your token to be read into the R
+environment automatically in future sessions.

@@ -2,12 +2,10 @@
 
 ## knit Rmd files
 
-rmds <- list.files(pattern = "\\.Rmd$")
-sh <- Map(knitr::knit, rmds)
-
-
 
 md2docs <- function() {
+    rmds <- list.files(pattern = "\\.Rmd$")
+    sh <- Map(knitr::knit, rmds)
     mds <- list.files(pattern = "\\.md")
     m2d_internal <- function(x) {
         sh <- system(paste("mv", x, "../docs"))
@@ -17,3 +15,4 @@ md2docs <- function() {
 }
 
 md2docs()
+
