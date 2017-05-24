@@ -45,14 +45,15 @@ ts_plot(ica17, "hours") +
     ggplot2::ggsave(file.path("..", "docs", "img", "ica17tweets.png"),
                     device = "png",
                     width = 7, height = 5, units = "in")
-
 ```
+
+
+![img/ica17tweets.png]
 
 
 <p align="center">
 <img src="img/ica17tweets.png" alt="ica17tweets">
 </p>
-
 
 The bundled functionality should only be thought of as a test
 drive. There's no guarantee it will work as expected. Instead, users
