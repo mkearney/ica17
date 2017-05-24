@@ -1,17 +1,25 @@
+---
+output: github_document
+---
 
-Getting started with rtweet
----------------------------
+
+
+
+## Getting started with rtweet
 
 Install from CRAN using `install.packages`.
 
-``` r
+
+```r
 ## install from CRAN
 install.packages("rtweet")
 ```
 
-Alternatively, install the most recent \[development\] version from Github using `install_github` (from the devtools package).
+Alternatively, install the most recent [development] version from
+Github using `install_github` (from the devtools package).
 
-``` r
+
+```r
 ## install from Github (dev version)
 if (!"devtools" %in% installed.packages()) {
     install.packages("devtools")
@@ -19,11 +27,40 @@ if (!"devtools" %in% installed.packages()) {
 devtools::install_github("mkearney/rtweet")
 ```
 
-I've tried to make the API token \[oauth\] process as painless as possible. In fact, rtweet comes bundled with a dedicated token, so users can start collecting Twitter data in seconds.
+I've tried to make the API token [oauth] process as painless as
+possible. In fact, rtweet even comes with a built-in token, so
+users can start collecting Twitter data in seconds.
 
-``` r
-ica17 <- search_tweets("#ICA17", n = 500)
-ts_plot(ica17)
+
+```r
+library(rtweet)
+ica17 <- search_tweets("ICA17 OR ICA2017", n = 1000)
+ts_plot(ica17, "hours") +
+    ggplot2::labs(
+        x = "Date and time of tweets",
+        y = "Frequency of tweets",
+        title = "Time series of #ICA17 tweets",
+        subtitle = "Frequency of Twitter statuses calculated in one-hour intervals."
+    ) +
+    ggplot2::ggsave(file.path("..", "docs", "img", "ica17tweets.png"),
+                    device = "png",
+                    width = 7, height = 5, units = "in")
 ```
 
-The bundled functionality should only be thought of as a test drive. There's no guarantee it will work as expected. Instead, users should create their own Twitter API tokens. I've laid out step by step instructions in the [auth vignette](https://mkearney.github.io/rtweet/articles/auth.html). This vignette also includes instructions for saving your token as an environment variable, which means you'll never have to worry about API authorization again (at least on the machine you're currently using)!
+
+![img/ica17tweets.png]
+
+
+<p align="center">
+<img src="img/ica17tweets.png" alt="ica17tweets">
+</p>
+
+The bundled functionality should only be thought of as a test
+drive. There's no guarantee it will work as expected. Instead, users
+should create their own Twitter API tokens. I've laid out step by step
+instructions in the
+[auth vignette](https://mkearney.github.io/rtweet/articles/auth.html).
+This vignette also includes instructions for saving your token as an
+environment variable, which means you'll never have to worry about API
+authorization again (at least on the machine you're currently using)!
+
