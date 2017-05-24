@@ -1,5 +1,3 @@
----
-output: github_document
----
 
-## Twitter's stream API
+Twitter's stream API
+--------------------
