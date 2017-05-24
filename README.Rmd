@@ -1,0 +1,17 @@
+---
+output: github_document
+---
+
+## International Communication Association 2017
+- Materials for presentation in computational methods division
+
+## Link to panel
+- For info on the panel [click here](http://tinyurl.com/hmg66jy)
+
+## Panel
+
+Panel: New Software and Tools for Analyzing Communication
+
+Submission: Introduction to rtwet: Collecting Twitter data
+
+Date: Fri, May 26, 14:00-15:15, Hilton San Diego Bayfront 3, Aqua 309
