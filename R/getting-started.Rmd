@@ -34,7 +34,7 @@ users can start collecting Twitter data in seconds.
 
 ```{r}
 library(rtweet)
-ica17 <- search_tweets("#ICA17", n = 500)
+ica17 <- search_tweets("ICA17 OR ICA2017", n = 1000)
 ts_plot(ica17, "hours") +
     ggplot2::labs(
         x = "Date and time of tweets",
@@ -49,9 +49,10 @@ ts_plot(ica17, "hours") +
 ```
 
 
-<img src="img/icatweets.png">
+<p align="center">
+<img src="img/ica17tweets.png" alt="ica17tweets">
+</p>
 
-![img/ica17tweets.png]
 
 The bundled functionality should only be thought of as a test
 drive. There's no guarantee it will work as expected. Instead, users
