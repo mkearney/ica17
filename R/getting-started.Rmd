@@ -7,8 +7,10 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 options(width = 70)
 ```
 
-
 ## Getting started with rtweet
+
+
+### Installing rtweet
 
 Install from CRAN using `install.packages`.
 
@@ -25,16 +27,69 @@ Github using `install_github` (from the devtools package).
 if (!"devtools" %in% installed.packages()) {
     install.packages("devtools")
 }
-devtools::install_github("mkearney/rtweet")
+devtools::install_github("mkearney/rtweet", build_vignettes = TRUE)
 ```
 
+### Authorizing access to Twitter's APIs
+
 I've tried to make the API token [oauth] process as painless as
-possible. In fact, rtweet even comes with a built-in token, so
-users can start collecting Twitter data in seconds.
+possible. That's why I've included the "auth" vignette, which ships
+with the package and contains step-by-step instructions on how to
+create and manage your Twitter API token. The vignette also includes
+instructions for saving a token as an environment variable, which
+automates the token-loading process for all future sessions (at least,
+for the machine you're using). View the
+[authorization vignette online](https://mkearney.github.io/rtweet/articles/auth.html)
+or enter the following code into your R console to load the vignette locally:
 
 ```{r}
+## Open Twitter token vignette in web browser.
+vignette(topic = "auth", package = "rtweet")
+```
+
+### Package documentation
+
+In addition to the API authorization vignette, rtweet also includes a
+[brief package overview vignette](https://mkearney.github.io/rtweet/articles/intro.html)
+as well as a
+[vignette demonstrating how to access Twitter's stream API](https://mkearney.github.io/rtweet/articles/stream.html). To
+open the vignettes locally, use the code below.
+
+```{r}
+vignette(topic = "intro", package = "rtweet")
+vignette(topic = "stream", package = "rtweet")
+```
+
+And thanks to Hadley et al.'s
+[pkgdown package](https://github.com/hadley/pkgdown) rtweet now has a
+dedicated
+[package documentation website](https://mkearney.github.io/rtweet). If
+you'd like to contribute to rtweet, or if you run into any bugs, users
+are encouraged to
+[create an issue](https://github.com/mkearney/rtweet/issues) on
+[rtweet's Github page](https://github.com/mkearney/rtweet).
+
+### Searching for tweets
+
+Searching for tweets is easy.
+
+```{r}
+## load rtweet
 library(rtweet)
+
+## search for tweets containing ICA17 or ICA2017 (not case sensitive)
 ica17 <- search_tweets("ICA17 OR ICA2017", n = 1000)
+```
+
+
+If you haven't downloaded ggplot2 yet, the plot that's created will
+look a little different than the plot below. That's because ggplot2 is
+only listed as a *recommended* (not required) package. If ggplot2 is
+installed on your machine, then `ts_plot` will return a ggplot object,
+which can be modified like any ggplot.
+
+```{r}
+## plot a time series of tweets, aggregating by one-hour intervals
 ts_plot(ica17, "hours") +
     ggplot2::labs(
         x = "Date and time of tweets",
@@ -51,11 +106,3 @@ ts_plot(ica17, "hours") +
 <img src="img/ica17tweets.png" alt="ica17tweets">
 </p>
 
-The built-in token is token is only meant to be used for test
-drives. There's no guarantee it will work as expected. Instead, users
-should create their own Twitter API tokens. For step-by-step
-instructions on how to create and manage your Twitter API token, see
-the ["auth" vignette](https://mkearney.github.io/rtweet/articles/auth.html).
-The vignette also includes instructions for saving your token as an
-environment variable. This allows your token to be read into the R
-environment automatically in future sessions.
