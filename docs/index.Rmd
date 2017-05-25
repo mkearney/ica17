@@ -1,9 +1,6 @@
 ---
 output: 
-  html_document: 
-    highlight: tango
-    keep_md: yes
-    self_contained: no
+  github_document: 
     toc: yes
 ---
 
