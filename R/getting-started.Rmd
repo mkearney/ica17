@@ -79,17 +79,21 @@ vignette(topic = "stream", package = "rtweet")
 ```
 
 And thanks to Hadley et al.'s
-[pkgdown package](https://github.com/hadley/pkgdown) rtweet now has a
+[pkgdown](https://github.com/hadley/pkgdown), rtweet now has a
 dedicated
-[package documentation website](https://mkearney.github.io/rtweet). If
-you'd like to contribute to rtweet, or if you run into any bugs, users
-are encouraged to
-[create an issue](https://github.com/mkearney/rtweet/issues) on
-[rtweet's Github page](https://github.com/mkearney/rtweet).
+[package documentation website](https://mkearney.github.io/rtweet). *Btw,
+while I'm on the subject of package documentation/maintenance, I'd
+also like to point out
+[rtweet's Github page](https://github.com/mkearney/rtweet). Contributions
+are welcome and if you run into any bugs or other issues, users are
+encouraged to
+[create an Github issue](https://github.com/mkearney/rtweet/issues).
+
 
 ### Searching for tweets
 
-Searching for tweets is easy.
+Searching for tweets is easy. For example, we could search through to
+grab statuses from the past 7-10 days with the hashtags `#ica17` or `#ica2017`.
 
 ```{r}
 ## load rtweet
@@ -99,13 +103,19 @@ library(rtweet)
 ica17 <- search_tweets("#ica17 OR #ica2017", n = 10000, include_rts = FALSE)
 ```
 
-If you haven't downloaded ggplot2 yet, the plot that's created will
-look a little different than the plot below. That's because ggplot2 is
-only listed as a *recommended* (not required) package. If ggplot2 is
+rtweet provides a few convenience functions to make analyzing the
+tweets a little easier. The main analysis function is `ts_plot`, which
+will aggregate the tweets over time and plot them for you. If you
+haven't downloaded ggplot2 yet, the plot created by `ts_plot` will
+look a little different than the plot below. That's because rtweet
+lists ggplot2 as *recommended* (not required) package. If ggplot2 is
 installed on your machine, then `ts_plot` will return a ggplot object,
-which can be modified like any ggplot.
+which can be modified like any other gg plot.
 
 ```{r}
+## load ggplot2
+library(ggplot2)
+
 ## plot a time series of tweets, aggregating by one-hour intervals
 p1 <- ts_plot(ica17, "hours") +
     ggplot2::labs(
@@ -114,45 +124,72 @@ p1 <- ts_plot(ica17, "hours") +
         title = "Time series of #ICA17 tweets",
         subtitle = "Frequency of Twitter statuses calculated in one-hour intervals."
     ) +
+    ## a custom ggplot2 theme I mocked up for ICA
     theme_ica17()
 
 ## render plot
 p1
-
 ```
 
 <p align="center">
 <img src="img/p1.png" alt="p1">
 </p>
 
-
 ## Analyzing text
+
+The second convenenience function for analysing tweets is
+`plain_tweets`. As you might guess, `plain_tweets` strips the text of
+the tweets down to plain text. Because there are already variables included 
+in the default tweets data that contain links, hashtags, and mentions, those 
+entities are stripped out of the text as well. What's returned are lower 
+case words. Below I've applied the function to the first 10 ICA17 tweets.
 
 ```{r, eval=TRUE}
 ## strip text of tweets
 plain_tweets(ica17$text[1:10])
+```
 
+The `plain_tweets` function is relatively straight forward at cutting
+through the clutter, but it still may not prepare you for quick and
+easy analysis. For that, you can use the `tokenize` argument in
+`plain_tweets`. The tokenize argument will return a vector of plain 
+text words for each tweet.
+
+```{r}
 ## tokenize by word
 plain_tweets(ica17$text[1:10], tokenize = TRUE)
 
-## get word counts
+## get words
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
+wrds[1:10]
+```
+
+This can easily be converted into a word count [frequency] table, but 
+it still leaves one problem. The most common words probably aren't going 
+to tell us a lot about our specific topic / set of tweets.
+
+```{r}
+## get word counts
 wrds <- table(unlist(wrds))
 
 ## view top 10 words
 head(sort(wrds, decreasing = TRUE), 10)
 ```
 
-These words don't appear to be very unique to ICA. We could always
-grab a premade list of stopwords, but those are unlikely to reflect
-the medium here. With rtweet it's possible to create your own
-dictionary of stop words by locating overlap between (a) a sample of
-tweets of interest and (b) a more *general* sample of tweets. We can
-accomplish this by searching for each letter in the alphabet separated
-by the boolean ` OR `. Reduce the redundancies by excluding retweets
-and you'll easily pull in tens of thousands of tweets. It's still not
-perfect, but it gives us a systematic starting point.
+See, these words don't appear to be very unique to ICA 2017. Of course, we could always
+find a premade list of stopwords to exclude, but those may not appropriately reflect
+the medium (Twitter) here. With rtweet, however, it's possible to create your own
+dictionary of stopwords by locating overlap between (a) a *particular* sample of
+tweets of interest and (b) a more *general* sample of tweets. 
 
+To do this, we're going to search for each letter of the alphabet separated
+by the boolean ` OR `. It's a bit hacky, but it returns massive amounts of 
+tweets about a wide range of topics. So, if we can identify the *unique* words 
+used in our sample, we may yet accomplish our goal. In the code below, I've 
+excluded retweets since those add unnecessary redundancies (and, ideally, we'd
+want a diverse pool of tweets). It's still not perfect, but it gives us a 
+systematic starting point that I imagine could be developed into a more 
+reliable method.
 
 ```{r}
 ## construct boolean-exploiting search query
@@ -166,16 +203,25 @@ sw <- search_tweets(all, n = 5000, include_rts = FALSE)
 ## create freq table of all words from general pool of tweets
 stopwords <- plain_tweets(sw$text, tokenize = TRUE)
 stopwords <- table(unlist(stopwords))
+```
 
-## exclude all ica17 words that appear more than 5 times in stopwords
-wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > 5L])]
+Now that we've identified the frequencies of words in this more general pool 
+of tweets, we can exclude all ICA tweet words that appear more than N number of 
+times in the general pool.
+
+```{r}
+## cutoff
+N <- 5L
+
+## exclude all ica17 words that appear more than N times in stopwords
+wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > N])]
 
 ## check top words again
 head(sort(wrds, decreasing = TRUE), 40)
 ```
 
-That turned out well! Those words look a lot more unique to the
-topic. We can quickly survey a lot of the words with a simple word cloud.
+That turned out well! These words look a lot more unique to the
+topic. We can quickly survey all of these words with a simple word cloud.
 
 ```{r}
 ## get some good colors
@@ -199,22 +245,43 @@ wordcloud::wordcloud(
 ### Tracking topic salience
 
 If we wanted to model the topics of tweets, we could conduct two
-searches for tweets over the same time period. And then compare the
-frequencies of tweets over time using time series.
+searches for tweets over the same time period and then compare the
+frequencies of tweets over time using time series. That's what I've 
+done in the example below.
+
+First I searched for tweets mentioning "North Korea", since I know 
+they conducted another missile test on Monday.
+
+```{r}
+## search tweets mentioning north korea (missle test on Monday)
+nk <- search_tweets(
+    "north korea", n = 18000, include_rts = FALSE)
+```
+
+Then I searched for tweets mentioning "CBO health care" (in any order, 
+anywhere in the tweet), since I know the CBO was released on Wednesday.
 
 ```{r}
 ## search for tweets about the CBO (released on Wed.)
 cbo <- search_tweets(
     "CBO health care", n = 18000, include_rts = FALSE)
+```
 
-## search tweets mentioning north korea (missle test on Monday)
-nk <- search_tweets(
-    "north korea", n = 18000, include_rts = FALSE)
+And then I combined the two data sets into one big data frame.
 
+```{r}
 ## cbind into one data frame
 df <- rbind(cbo, nk)
 ```
 
+Using the `ts_plot` function, I then provide a list of `filter` words 
+(via regular expression; the bar is like an "OR"). Use the `key` argument 
+if you want to have nicer looking filter labels. By default `ts_plot` 
+will create groups based on the text of the tweet and the filters provided. 
+However, you can pass along the name of any variable in DF and the function 
+will use that to classify groups. In the code below, I applied `plain_tweets`
+to the text to create a new variable, and then specified that I wanted to 
+apply the filters to that variable by using the `txt` argument in `ts_plot`.
 
 ```{r}
 ## create plain tweets variable
@@ -226,7 +293,11 @@ p3 <- ts_plot(df, by = "15 mins",
                         "korea|kim|jung un|missile"),
              key = c("CBO", "NKorea"),
              txt = "text_plain")
+```
 
+Now it's easy to add more layers and make this plot look nice.
+
+```{r}
 ## add theme and style plot
 p3 <- p3 + theme_ica17() +
     geom_line(size = 1) +
@@ -236,10 +307,13 @@ p3 <- p3 + theme_ica17() +
     labs(x = NULL, y = NULL, title = "Tracing topic salience in Twitter statuses",
          subtitle = "Tweets (N = 23,467) were aggregated in 15-minute intervals. Retweets were not included.")
 
-## print plot
+## render plot
 p3
 ```
 
 <p align="center">
 <img src="img/p3.png" alt="p3">
 </p>
+
+
+And that's it!
