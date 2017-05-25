@@ -104,6 +104,8 @@ p1 <- ts_plot(ica17, "hours") +
         subtitle = "Frequency of Twitter statuses calculated in one-hour intervals."
     ) +
     theme_ica17()
+
+## render plot
 p1
 ```
 
@@ -316,6 +318,7 @@ p3 <- p3 + theme_ica17() +
     labs(x = NULL, y = NULL, title = "Tracing topic salience in Twitter statuses",
          subtitle = "Tweets (N = 23,467) were aggregated in 15-minute intervals. Retweets were not included.")
 
+## print plot
 p3
 ```
 
