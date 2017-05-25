@@ -1,4 +1,8 @@
 ---
+title: "Introduction to rtweet: Collecting Twitter data"
+author: "Michael W. Kearney  
+
+University of Kansas"
 output: 
   github_document: 
     toc: yes
@@ -27,12 +31,10 @@ suppressPackageStartupMessages(library(rtweet))
 source("../R/theme-ica17.R")
 ```
 
-# Intro to rtweet
+## Getting started with Twitter data
 
-## Twitter data
-
-Twitter data was already trendy, but the unpresidented 2016 U.S. 
-election has elevated it to a fever pitch. One of the biggest drivers 
+Twitter data were already trendy, but the *unpresidented* 2016 U.S. 
+election has escalated things to a fever pitch. One of the biggest drivers 
 of the trend is the widespread availability of Twitter data. Twitter 
 makes much of its user-generated data freely available to the public 
 via Application Program Interfaces (APIs). APIs refer to sets of 
@@ -58,7 +60,7 @@ downside to the stream API is that it is limited to prospective
 (tracking, monitoring, etc.) but not retrospective (surveying, 
 searching, etc.) queries.
 
-## Installing rtweet
+### Installing rtweet
 
 Install from CRAN using `install.packages`.
 
@@ -78,7 +80,7 @@ if (!"devtools" %in% installed.packages()) {
 devtools::install_github("mkearney/rtweet", build_vignettes = TRUE)
 ```
 
-## Authorizing access to Twitter's APIs
+### API authorization
 
 I've tried to make the API token [oauth] process as painless as
 possible. That's why I've included the "auth" vignette, which ships
@@ -95,7 +97,7 @@ or enter the following code into your R console to load the vignette locally:
 vignette(topic = "auth", package = "rtweet")
 ```
 
-## Package documentation
+### Package documentation
 
 In addition to the API authorization vignette, rtweet also includes a
 [brief package overview vignette](https://mkearney.github.io/rtweet/articles/intro.html)
@@ -121,7 +123,9 @@ Contributions are welcome and if you run into any bugs or other
 issues, users are encouraged to
 [create an Github issue](https://github.com/mkearney/rtweet/issues).
 
-## Searching for tweets
+## Some applied examples
+
+### search_tweets
 
 Searching for tweets is easy. For example, we could search for all 
 [publically] available statuses from the past 7-10 days that use the 
@@ -157,8 +161,6 @@ ica17_contd <- search_tweets(
 )
 ```
 
-### Tweets data
-
 Data returned by `search_tweets` is quite extensive. One recently
 added feature makes navigating the data a bit easier. As of version 
 0.4.3, *rtweet* returns `tibble` data frames (assuming the user has
@@ -167,7 +169,7 @@ all packages in the tidyverse). Tibbles are especially nice when
 working with larger data sets because accidental printing in R has
 been known to take years off of one's life (needs citation).
 
-#### ts_filter and ts_plot
+### ts_filter and ts_plot
 
 Included in the rtweet package are a few convenenience functions, 
 which have been designed to assist in the analysis of Twitter data.
@@ -217,11 +219,7 @@ p1 <- ts_plot(ica17, "hours") +
 p1
 ```
 
-<!-- <p align="center">
-<img src="img/p1.png" alt="p1">
-</p> -->
-
-## Analyzing text
+### plain_tweets
 
 The second convenenience function for analysing tweets is
 `plain_tweets`. As you might guess, `plain_tweets` strips the text of
@@ -246,6 +244,8 @@ text words for each tweet.
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
 wrds[1:3]
 ```
+
+### Identifying stop words
 
 This can easily be converted into a word count [frequency] table, but 
 it still leaves one problem. The most common words probably aren't going 
@@ -304,6 +304,8 @@ wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > N])]
 head(sort(wrds, decreasing = TRUE), 40)
 ```
 
+### Creating a word cloud
+
 That turned out well! These words look a lot more unique to the
 topic. We can quickly survey all of these words with a simple word cloud.
 
@@ -328,7 +330,7 @@ suppressWarnings(wordcloud::wordcloud(
 <img src="img/p2.png" alt="p2">
 </p> -->
 
-## Tracking topic salience
+### Filtering topics
 
 If we wanted to model the topics of tweets, we could conduct two
 searches for tweets over the same time period and then compare the
@@ -407,27 +409,39 @@ p3 <- p3 +
 p3
 ```
 
-<!-- <p align="center">
-<img src="img/p3.png" alt="p3">
-</p> -->
+### Tidy sentiment analysis
 
-
-## Get sentiment analysis
+The *syuzhet* package makes sentiment analysis criminally easy.
 
 ```{r}
 ## conduct sentiment analysis
 sa <- syuzhet::get_nrc_sentiment(df$text_plain)
 ```
 
+Within a few seconds, the analysis returns coded variables for several
+categories of emotion and valence. A preview of the sentiment scores 
+returned by `get_nrc_sentiment` is provided below.
+
 ```{r, eval=TRUE}
 ## view output
 tibble::as_tibble(sa)
+```
 
+Since the return object is a data frame with the same number of rows 
+as the CBO/North Korea data, the columns can easily be combined to 
+create one data frame.
+
+```{r, eval=TRUE}
 ## bind columns
 df <- cbind(df, sa)
 ```
 
-## Aggregating features of Twitter statuses using dplyr
+This data structure is useful for most media researchers, but it's not very 
+flexible---either for summarizing the data or for visualizing it. Fortunately,
+recent advancements<sup>[1](#myfootnote1)</sup> in data wrangling in R make converting this wide data to 
+tidy, long data a breeze. In the code below, I've created a user function
+to assist in time-rounding efforts, and I've enlisted *dplyr* and *tidyr* to do 
+the dirty work.
 
 ```{r, eval=TRUE}
 ## load dplyr
@@ -455,26 +469,43 @@ long_emotion_ts <- df %>%
     ## group by time, query, and sentiment
     group_by(created_at, query, sentiment) %>%
     ## get mean for each grouping
-    summarize(score = mean(score, na.rm = TRUE))
+    summarize(score = mean(score, na.rm = TRUE)) %>% 
+    ungroup()
+```
 
+The result is a tidy data paradise:
+
+```{r, eval=TRUE}
 ## view data
 long_emotion_ts
 ```
 
+Which we can pass right along to *ggplot2* for the finish:
 
 ```{r, eval=TRUE}
 ## plot data
 long_emotion_ts %>%
-    ggplot(aes(x = created_at, y = score, color = query)) + 
+    ggplot(aes(x = created_at, y = score, color = query, alpha = .75)) + 
     geom_point() + 
     geom_smooth(method = "loess") + 
     facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
-    theme_ica17() + 
-    theme(legend.position = "bottom", 
+    theme_bw() + 
+    theme(text = element_text(family = "Roboto Condensed"),
+          plot.title = element_text(face = "bold"),
+          legend.position = "bottom", 
           axis.text = element_text(size = 9),
           legend.title = element_blank()) + 
+    labs(x = NULL, y = NULL, 
+         title = "Sentiment analysis of tweets over time",
+         subtitle = "Tweets aggregated by hour on topics of the CBO and North Korea") +
     scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
 ```
 
 
 And that's it!
+
+
+<a name="myfootnote1">1</a>: I'll admit that for a time I was hesitant to embrace 
+the collection of packages collectively known as the *tidyverse* (formerly 
+known as the *Hadley*verse; see: [https://github.com/hadley](https://github.com/hadley)). 
+But the tidyverse, and especially *dplyr*, is really quite amazing.

@@ -1,30 +1,30 @@
+Introduction to rtweet: Collecting Twitter data
+================
+Michael W. Kearney University of Kansas
 
--   [Intro to rtweet](#intro-to-rtweet)
-    -   [Twitter data](#twitter-data)
+-   [Getting started with Twitter data](#getting-started-with-twitter-data)
     -   [Installing rtweet](#installing-rtweet)
-    -   [Authorizing access to Twitter's APIs](#authorizing-access-to-twitters-apis)
+    -   [API authorization](#api-authorization)
     -   [Package documentation](#package-documentation)
-    -   [Searching for tweets](#searching-for-tweets)
-        -   [Tweets data](#tweets-data)
-    -   [Analyzing text](#analyzing-text)
-    -   [Tracking topic salience](#tracking-topic-salience)
-    -   [Get sentiment analysis](#get-sentiment-analysis)
-    -   [Aggregating features of Twitter statuses using dplyr](#aggregating-features-of-twitter-statuses-using-dplyr)
+-   [Some applied examples](#some-applied-examples)
+    -   [search\_tweets](#search_tweets)
+    -   [ts\_filter and ts\_plot](#ts_filter-and-ts_plot)
+    -   [plain\_tweets](#plain_tweets)
+    -   [Identifying stop words](#identifying-stop-words)
+    -   [Creating a word cloud](#creating-a-word-cloud)
+    -   [Filtering topics](#filtering-topics)
+    -   [Tidy sentiment analysis](#tidy-sentiment-analysis)
 
-Intro to rtweet
-===============
+Getting started with Twitter data
+---------------------------------
 
-Twitter data
-------------
-
-Twitter data was already trendy, but the unpresidented 2016 U.S. election has elevated it to a fever pitch. One of the biggest drivers of the trend is the widespread availability of Twitter data. Twitter makes much of its user-generated data freely available to the public via Application Program Interfaces (APIs). APIs refer to sets of protocols and procedures for interacting with sites. Twitter maintains several APIs. The two most condusive to data collection are the REST API and the stream API, both of which I describe below.
+Twitter data were already trendy, but the *unpresidented* 2016 U.S. election has escalated things to a fever pitch. One of the biggest drivers of the trend is the widespread availability of Twitter data. Twitter makes much of its user-generated data freely available to the public via Application Program Interfaces (APIs). APIs refer to sets of protocols and procedures for interacting with sites. Twitter maintains several APIs. The two most condusive to data collection are the REST API and the stream API, both of which I describe below.
 
 Twitter's REST API provides a set of protocols for exploring and interacting with Twitter data related to user statuses (tweets), user profiles and timelines, and user network connections. The data are restful in that they have been archived by Twitter. Navigating these resting endpoints can, at times, be resource intensive, but it also makes it possible to perform highly complex and specific queries.
 
 Twitter data not yet archived and accessible via the REST API can be accessed using Twitter's stream API. As its name suggests, the stream API provides users with a live stream of Twitter data. Because the data are streamed, or pushed, to the user, the stream API reduces overhead associated with performing queries on archived data sources. This makes it possible to collect large amounts of data very quickly and with relatively little strain on computational resources. The downside to the stream API is that it is limited to prospective (tracking, monitoring, etc.) but not retrospective (surveying, searching, etc.) queries.
 
-Installing rtweet
------------------
+### Installing rtweet
 
 Install from CRAN using `install.packages`.
 
@@ -43,8 +43,7 @@ if (!"devtools" %in% installed.packages()) {
 devtools::install_github("mkearney/rtweet", build_vignettes = TRUE)
 ```
 
-Authorizing access to Twitter's APIs
-------------------------------------
+### API authorization
 
 I've tried to make the API token \[oauth\] process as painless as possible. That's why I've included the "auth" vignette, which ships with the package and contains step-by-step instructions on how to create and manage your Twitter API token. The vignette also includes instructions for saving a token as an environment variable, which automates the token-loading process for all future sessions (at least, for the machine you're using). View the [authorization vignette online](https://mkearney.github.io/rtweet/articles/auth.html) or enter the following code into your R console to load the vignette locally:
 
@@ -53,8 +52,7 @@ I've tried to make the API token \[oauth\] process as painless as possible. That
 vignette(topic = "auth", package = "rtweet")
 ```
 
-Package documentation
----------------------
+### Package documentation
 
 In addition to the API authorization vignette, rtweet also includes a [brief package overview vignette](https://mkearney.github.io/rtweet/articles/intro.html) as well as a [vignette demonstrating how to access Twitter's stream API](https://mkearney.github.io/rtweet/articles/stream.html). To open the vignettes locally, use the code below.
 
@@ -68,8 +66,10 @@ vignette(topic = "stream", package = "rtweet")
 
 And thanks to [pkgdown](https://github.com/hadley/pkgdown), rtweet now has a dedicated [package documentation website](https://mkearney.github.io/rtweet). \*Btw, while I'm on the subject of package documentation/maintenance, I'd also like to point out [rtweet's Github page](https://github.com/mkearney/rtweet). Contributions are welcome and if you run into any bugs or other issues, users are encouraged to [create an Github issue](https://github.com/mkearney/rtweet/issues).
 
-Searching for tweets
---------------------
+Some applied examples
+---------------------
+
+### search\_tweets
 
 Searching for tweets is easy. For example, we could search for all \[publically\] available statuses from the past 7-10 days that use the hashtags `#ica17` or `#ica2017`. In the code below I've specified 18,000 statuses (tweets), which is the maximum number a user may request every 15 minutes.
 
@@ -96,11 +96,9 @@ ica17_contd <- search_tweets(
 )
 ```
 
-### Tweets data
-
 Data returned by `search_tweets` is quite extensive. One recently added feature makes navigating the data a bit easier. As of version 0.4.3, *rtweet* returns `tibble` data frames (assuming the user has installed the *tibble* package, which is a dependency for nearly all packages in the tidyverse). Tibbles are especially nice when working with larger data sets because accidental printing in R has been known to take years off of one's life (needs citation).
 
-#### ts\_filter and ts\_plot
+### ts\_filter and ts\_plot
 
 Included in the rtweet package are a few convenenience functions, which have been designed to assist in the analysis of Twitter data. One of these convenient functions is `ts_plot`, which is a plot-based wrapper around `ts_filter`. The `ts_plot` and `ts_filter` functions aggregate the frequency of tweets over specified intervals of time. Hence, the "ts" (time series) naming convention. In addition to aggregating the frequency of statuses, `ts_plot` will also plot the time series.
 
@@ -159,11 +157,7 @@ p1
 
 ![](index_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-<!-- <p align="center">
-<img src="img/p1.png" alt="p1">
-</p> -->
-Analyzing text
---------------
+### plain\_tweets
 
 The second convenenience function for analysing tweets is `plain_tweets`. As you might guess, `plain_tweets` strips the text of the tweets down to plain text. Because there are already variables included in the default tweets data that contain links, hashtags, and mentions, those entities are stripped out of the text as well. What's returned are lower case words. Below I've applied the function to the first few ICA17 tweets.
 
@@ -193,6 +187,8 @@ wrds[1:3]
     ## 
     ## [[3]]
     ## [1] "nato"
+
+### Identifying stop words
 
 This can easily be converted into a word count \[frequency\] table, but it still leaves one problem. The most common words probably aren't going to tell us a lot about our specific topic / set of tweets.
 
@@ -273,6 +269,8 @@ head(sort(wrds, decreasing = TRUE), 40)
     ##  presentation      sapphire      schedule      scholars      students 
     ##            15            15            15            15            15
 
+### Creating a word cloud
+
 That turned out well! These words look a lot more unique to the topic. We can quickly survey all of these words with a simple word cloud.
 
 ``` r
@@ -297,8 +295,7 @@ suppressWarnings(wordcloud::wordcloud(
 <!-- <p align="center">
 <img src="img/p2.png" alt="p2">
 </p> -->
-Tracking topic salience
------------------------
+### Filtering topics
 
 If we wanted to model the topics of tweets, we could conduct two searches for tweets over the same time period and then compare the frequencies of tweets over time using time series. That's what I've done in the example below.
 
@@ -367,16 +364,16 @@ p3
 
 ![](index_files/figure-markdown_github/unnamed-chunk-22-1.png)
 
-<!-- <p align="center">
-<img src="img/p3.png" alt="p3">
-</p> -->
-Get sentiment analysis
-----------------------
+### Tidy sentiment analysis
+
+The *syuzhet* package makes sentiment analysis criminally easy.
 
 ``` r
 ## conduct sentiment analysis
 sa <- syuzhet::get_nrc_sentiment(df$text_plain)
 ```
+
+Within a few seconds, the analysis returns coded variables for several categories of emotion and valence. A preview of the sentiment scores returned by `get_nrc_sentiment` is provided below.
 
 ``` r
 ## view output
@@ -399,13 +396,14 @@ tibble::as_tibble(sa)
     ## # ... with 23,457 more rows, and 2 more variables: negative <dbl>,
     ## #   positive <dbl>
 
+Since the return object is a data frame with the same number of rows as the CBO/North Korea data, the columns can easily be combined to create one data frame.
+
 ``` r
 ## bind columns
 df <- cbind(df, sa)
 ```
 
-Aggregating features of Twitter statuses using dplyr
-----------------------------------------------------
+This data structure is useful for most media researchers, but it's not very flexible---either for summarizing the data or for visualizing it. Fortunately, recent advancements<sup>[1](#myfootnote1)</sup> in data wrangling in R make converting this wide data to tidy, long data a breeze. In the code below, I've created a user function to assist in time-rounding efforts, and I've enlisted *dplyr* and *tidyr* to do the dirty work.
 
 ``` r
 ## load dplyr
@@ -433,15 +431,17 @@ long_emotion_ts <- df %>%
     ## group by time, query, and sentiment
     group_by(created_at, query, sentiment) %>%
     ## get mean for each grouping
-    summarize(score = mean(score, na.rm = TRUE))
+    summarize(score = mean(score, na.rm = TRUE)) %>% 
+    ungroup()
+```
 
+The result is a tidy data paradise:
+
+``` r
 ## view data
 long_emotion_ts
 ```
 
-    ## Source: local data frame [720 x 4]
-    ## Groups: created_at, query [?]
-    ## 
     ## # A tibble: 720 x 4
     ##             created_at           query    sentiment     score
     ##                 <dttm>           <chr>        <chr>     <dbl>
@@ -457,20 +457,29 @@ long_emotion_ts
     ## 10 2017-08-06 07:00:00 CBO health care        trust 0.1428571
     ## # ... with 710 more rows
 
+Which we can pass right along to *ggplot2* for the finish:
+
 ``` r
 ## plot data
 long_emotion_ts %>%
-    ggplot(aes(x = created_at, y = score, color = query)) + 
+    ggplot(aes(x = created_at, y = score, color = query, alpha = .75)) + 
     geom_point() + 
     geom_smooth(method = "loess") + 
     facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
-    theme_ica17() + 
-    theme(legend.position = "bottom", 
+    theme_bw() + 
+    theme(text = element_text(family = "Roboto Condensed"),
+          plot.title = element_text(face = "bold"),
+          legend.position = "bottom", 
           axis.text = element_text(size = 9),
           legend.title = element_blank()) + 
+    labs(x = NULL, y = NULL, 
+         title = "Sentiment analysis of tweets over time",
+         subtitle = "Tweets aggregated by hour on topics of the CBO and North Korea") +
     scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
 ```
 
-![](index_files/figure-markdown_github/unnamed-chunk-26-1.png)
+![](index_files/figure-markdown_github/unnamed-chunk-28-1.png)
 
 And that's it!
+
+<a name="myfootnote1">1</a>: I'll admit that for a time I was hesitant to embrace the collection of packages collectively known as the *tidyverse* (formerly known as the *Hadley*verse; see: <https://github.com/hadley>). But the tidyverse, and especially *dplyr*, is really quite amazing.
