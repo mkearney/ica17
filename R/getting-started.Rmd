@@ -157,9 +157,6 @@ text words for each tweet.
 
 ```{r, eval=TRUE}
 ## tokenize by word
-plain_tweets(ica17$text[1:10], tokenize = TRUE)
-
-## get words
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
 wrds[1:10]
 ```
