@@ -23,9 +23,17 @@ suppressPackageStartupMessages(library(rtweet))
 source("theme-ica17.R")
 ```
 
-## Getting started with rtweet
+# Intro to rtweet
 
-### Installing rtweet
+## Twitter data
+
+Twitter data was already trendy, but the unpresidented 2016 U.S. election has elevated it to a fever pitch. One of the biggest drivers of the trend is the widespread availability of Twitter data. Twitter makes much of its user-generated data freely available to the public via Application Program Interfaces (APIs). APIs refer to sets of protocols and procedures for interacting with sites. Twitter maintains several APIs. The two most condusive to data collection are the REST API and the stream API, both of which I describe below.
+
+Twitter's REST API provides a set of protocols for exploring and interacting with Twitter data related to user statuses (tweets), user profiles and timelines, and user network connections. The data are restful in that they have been archived by Twitter. Navigating these resting endpoints can, at times, be resource intensive, but it also makes it possible to perform highly complex and specific queries.
+
+Twitter data not yet archived and accessible via the REST API can be accessed using Twitter's stream API. As its name suggests, the stream API provides users with a live stream of Twitter data. Because the data are streamed, or pushed, to the user, the stream API reduces overhead associated with performing queries on archived data sources. This makes it possible to collect large amounts of data very quickly and with relatively little strain on computational resources. The downside to the stream API is that it is limited to prospective (tracking, monitoring, etc.) but not retrospective (surveying, searching, etc.) queries.
+
+## Installing rtweet
 
 Install from CRAN using `install.packages`.
 
@@ -45,7 +53,7 @@ if (!"devtools" %in% installed.packages()) {
 devtools::install_github("mkearney/rtweet", build_vignettes = TRUE)
 ```
 
-### Authorizing access to Twitter's APIs
+## Authorizing access to Twitter's APIs
 
 I've tried to make the API token [oauth] process as painless as
 possible. That's why I've included the "auth" vignette, which ships
@@ -62,7 +70,7 @@ or enter the following code into your R console to load the vignette locally:
 vignette(topic = "auth", package = "rtweet")
 ```
 
-### Package documentation
+## Package documentation
 
 In addition to the API authorization vignette, rtweet also includes a
 [brief package overview vignette](https://mkearney.github.io/rtweet/articles/intro.html)
@@ -90,7 +98,7 @@ encouraged to
 [create an Github issue](https://github.com/mkearney/rtweet/issues).
 
 
-### Searching for tweets
+## Searching for tweets
 
 Searching for tweets is easy. For example, we could search through to
 grab statuses from the past 7-10 days with the hashtags `#ica17` or `#ica2017`.
@@ -241,7 +249,7 @@ wordcloud::wordcloud(
 <img src="img/p2.png" alt="p2">
 </p>
 
-### Tracking topic salience
+## Tracking topic salience
 
 If we wanted to model the topics of tweets, we could conduct two
 searches for tweets over the same time period and then compare the
