@@ -2,13 +2,28 @@
 output: github_document
 ---
 
-```{r setup, include = FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 options(width = 70)
 ```
 
-## Getting started with rtweet
+```{r, eval=TRUE, echo=FALSE}
+## load data
+ica17 <- readRDS("../data/ica17.rds")
+sw <- readRDS("../data/sw.rds")
+df <- readRDS("../data/df.rds")
 
+## load ggplot2
+suppressPackageStartupMessages(library(ggplot2))
+
+## load rtweet
+suppressPackageStartupMessages(library(rtweet))
+
+## custom ggplot theme
+source("theme-ica17.R")
+```
+
+## Getting started with rtweet
 
 ### Installing rtweet
 
@@ -56,7 +71,10 @@ as well as a
 open the vignettes locally, use the code below.
 
 ```{r}
+## overview of rtweet
 vignette(topic = "intro", package = "rtweet")
+
+## accessing Twitter's stream API
 vignette(topic = "stream", package = "rtweet")
 ```
 
@@ -89,54 +107,128 @@ which can be modified like any ggplot.
 
 ```{r}
 ## plot a time series of tweets, aggregating by one-hour intervals
-ts_plot(ica17, "hours") +
+p1 <- ts_plot(ica17, "hours") +
     ggplot2::labs(
         x = "Date and time of tweets",
         y = "Frequency of tweets",
         title = "Time series of #ICA17 tweets",
         subtitle = "Frequency of Twitter statuses calculated in one-hour intervals."
     ) +
-    ggplot2::ggsave(file.path("..", "docs", "img", "ica17tweets.png"),
-                    device = "png",
-                    width = 7, height = 5, units = "in")
+    theme_ica17()
+p1
+
 ```
 
 <p align="center">
-<img src="img/ica17tweets.png" alt="ica17tweets">
+<img src="img/p1.png" alt="p1">
 </p>
-
 
 
 ## Analyzing text
 
-```{r}
+```{r, eval=TRUE}
 ## strip text of tweets
 plain_tweets(ica17$text[1:10])
 
 ## tokenize by word
-wrds <- plain_tweets(ica17$text, tokenize = TRUE)
+plain_tweets(ica17$text[1:10], tokenize = TRUE)
 
-## freq table of all words
+## get word counts
+wrds <- plain_tweets(ica17$text, tokenize = TRUE)
 wrds <- table(unlist(wrds))
 
-## get stop words
-stopwords <- search_tweets(paste(letters, collapse = " OR "), n = 1000, include_rts = FALSE)
-stopwords <- plain_tweets(stopwords$text, tokenize = TRUE)
+## view top 10 words
+head(sort(wrds, decreasing = TRUE), 10)
+```
+
+We can create our own dictionary of stop words by locating overlap
+between our sample and a more general sample of tweets. We can get a
+more general sample by searching for each letter in the alphabet with
+separated by ` OR ` (boolean logic used by Twitter). I've done that
+below to get five thousand tweets.
+
+
+```{r}
+## construct boolean-exploiting search query
+all <- paste(letters, collapse = " OR ")
+
+## conduct search for 5,000 original (non-retweeted) tweets
+sw <- search_tweets(all, n = 5000, include_rts = FALSE)
+```
+
+```{r, eval=TRUE}
+## create freq table of all words from general pool of tweets
+stopwords <- plain_tweets(sw$text, tokenize = TRUE)
 stopwords <- table(unlist(stopwords))
 
-## rm stop words
-wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > 10L])]
+## exclude all ica17 words that appear more than 5 times in stopwords
+wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > 5L])]
 
-## word cloud
+## check top words again
+head(sort(wrds, decreasing = TRUE), 40)
+
+```
+
+Create simple word cloud to visualize.
+
+```{r}
+## get some good colors
 cols <- sample(rainbow(10, s = .5, v = .75), 10)
-png("../docs/img/wordcloud.png", 7, 7, "in", res = 127.5)
-par(bg = "black")
-wordcloud::wordcloud(names(wrds), wrds, min.freq = 5, random.color = FALSE, colors = cols,
-                     family = "Roboto Condensed", font = 1, scale = c(4.75, .75))
-dev.off()
+
+## plot word cloud
+wordcloud::wordcloud(
+    words = names(wrds),
+    freq = wrds,
+    random.color = FALSE,
+    colors = cols,
+    family = "Roboto Condensed",
+    scale = c(4.5, .4))
+
+```
+
+<p align="center">
+<img src="img/p2.png" alt="p2">
+</p>
+
+### Tracking topic salience
+
+```{r}
+## search for tweets about the CBO (released on Wed.)
+cbo <- search_tweets(
+    "CBO health care", n = 18000, include_rts = FALSE)
+
+## search tweets mentioning north korea (missle test on Monday)
+nk <- search_tweets(
+    "north korea", n = 18000, include_rts = FALSE)
+
+## cbind into one data frame
+df <- rbind(cbo, nk)
 ```
 
 
+```{r}
+## create plain tweets variable
+df$text_plain <- plain_tweets(df$text)
+
+## filter by search topic
+p3 <- ts_plot(df, by = "15 mins",
+             filter = c("cbo|health|care|bill|insured|deficit|budget",
+                        "korea|kim|jung un|missile"),
+             key = c("CBO", "NKorea"),
+             txt = "text_plain")
+
+## add theme and style plot
+p3 <- p3 + theme_ica17() +
+    geom_line(size = 1) +
+    scale_color_manual(values = c("#cc1111", "#0022cc")) +
+    theme(legend.title = element_blank()) +
+    scale_x_datetime(date_labels = "%b %d %H:%m") +
+    labs(x = NULL, y = NULL, title = "Tracing topic salience in Twitter statuses",
+         subtitle = "Tweets (N = 23,467) were aggregated in 15-minute intervals. Retweets were not included.")
+
+p3
+```
+
 <p align="center">
-<img src="img/wordcloud.png" alt="wordcloud">
+<img src="img/p3.png" alt="p3">
 </p>
