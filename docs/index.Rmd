@@ -1,6 +1,12 @@
 ---
-output: github_document
+output: 
+  html_document: 
+    highlight: tango
+    keep_md: yes
+    self_contained: no
+    toc: yes
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
@@ -12,6 +18,7 @@ options(width = 70)
 ica17 <- readRDS("../data/ica17.rds")
 sw <- readRDS("../data/sw.rds")
 df <- readRDS("../data/df.rds")
+sa <- readRDS("../data/sa.rds")
 
 ## load ggplot2
 suppressPackageStartupMessages(library(ggplot2))
@@ -20,7 +27,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(rtweet))
 
 ## custom ggplot theme
-source("theme-ica17.R")
+source("../R/theme-ica17.R")
 ```
 
 # Intro to rtweet
@@ -148,7 +155,7 @@ last_status_id <-  ica17$status_id[nrow(ica17)]
 
 ## pass last_status_id to max_id and run search again.
 ica17_contd <- search_tweets(
-    "ica17 OR #ica2017", n = 18000, include_rts = FALSE,
+    "#ica17 OR #ica2017", n = 18000, include_rts = FALSE,
     max_id = last_status_id
 )
 ```
@@ -174,6 +181,17 @@ of time. Hence, the "ts" (time series) naming convention. In addition
 to aggregating the frequency of statuses, `ts_plot` will also 
 plot the time series.
 
+```{r, eval=TRUE}
+## aggregate freq of tweets in one-hour intervals
+agg <- ts_filter(ica17, by = "hours")
+
+## view data
+agg
+
+## plot data
+ts_plot(agg)
+```
+
 The plot produced by `ts_plot` depends on whether the user has 
 installed *ggplot2*, which is a suggested but not required package 
 dependency for *rtweet*. If you haven't installed *ggplot2* then 
@@ -184,14 +202,12 @@ you can easily add layers and customize the plot to your liking.
 ```{r}
 ## load ggplot2
 library(ggplot2)
+```
 
-## aggregate freq of tweets in one-hour intervals
-agg <- ts_filter(ica17, by = "hours")
-
-
+```{r, eval=TRUE}
 ## plot a time series of tweets, aggregating by one-hour intervals
 p1 <- ts_plot(ica17, "hours") +
-    ggplot2::labs(
+    labs(
         x = "Date and time",
         y = "Frequency of tweets",
         title = "Time series of #ICA17 tweets",
@@ -204,9 +220,9 @@ p1 <- ts_plot(ica17, "hours") +
 p1
 ```
 
-<p align="center">
+<!-- <p align="center">
 <img src="img/p1.png" alt="p1">
-</p>
+</p> -->
 
 ## Analyzing text
 
@@ -215,11 +231,11 @@ The second convenenience function for analysing tweets is
 the tweets down to plain text. Because there are already variables included 
 in the default tweets data that contain links, hashtags, and mentions, those 
 entities are stripped out of the text as well. What's returned are lower 
-case words. Below I've applied the function to the first 10 ICA17 tweets.
+case words. Below I've applied the function to the first few ICA17 tweets.
 
 ```{r, eval=TRUE}
 ## strip text of tweets
-plain_tweets(ica17$text[1:10])
+plain_tweets(ica17$text[1:3])
 ```
 
 The `plain_tweets` function is relatively straight forward at cutting
@@ -231,7 +247,7 @@ text words for each tweet.
 ```{r, eval=TRUE}
 ## tokenize by word
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
-wrds[1:10]
+wrds[1:3]
 ```
 
 This can easily be converted into a word count [frequency] table, but 
@@ -242,8 +258,8 @@ to tell us a lot about our specific topic / set of tweets.
 ## get word counts
 wrds <- table(unlist(wrds))
 
-## view top 10 words
-head(sort(wrds, decreasing = TRUE), 10)
+## view top 40 words
+head(sort(wrds, decreasing = TRUE), 40)
 ```
 
 See, these words don't appear to be very unique to ICA 2017. Of course, we could always
@@ -257,11 +273,10 @@ by the boolean ` OR `. It's a bit hacky, but it returns massive amounts of
 tweets about a wide range of topics. So, if we can identify the *unique* words 
 used in our sample, we may yet accomplish our goal. 
 
-In the code below, I've 
-excluded retweets since those add unnecessary redundancies (and, ideally, we'd
-want a diverse pool of tweets). It's still not perfect, but it gives us a 
-systematic starting point that I imagine could be developed into a more 
-reliable method.
+In the code below, I've excluded retweets since those add unnecessary 
+redundancies (and, ideally, we'd want a diverse pool of tweets). It's 
+still not perfect, but it gives us a systematic starting point that 
+I imagine could be developed into a more reliable method.
 
 ```{r}
 ## construct boolean-exploiting search query
@@ -295,24 +310,26 @@ head(sort(wrds, decreasing = TRUE), 40)
 That turned out well! These words look a lot more unique to the
 topic. We can quickly survey all of these words with a simple word cloud.
 
-```{r}
+```{r, eval=TRUE}
 ## get some good colors
 cols <- sample(rainbow(10, s = .5, v = .75), 10)
 
 ## plot word cloud
 par(bg = "black")
-wordcloud::wordcloud(
+suppressWarnings(wordcloud::wordcloud(
     words = names(wrds),
     freq = wrds,
+    min.freq = 5,
     random.color = FALSE,
     colors = cols,
     family = "Roboto Condensed",
-    scale = c(4.5, .4))
+    scale = c(4, .25))
+)
 ```
 
-<p align="center">
+<!-- <p align="center">
 <img src="img/p2.png" alt="p2">
-</p>
+</p> -->
 
 ## Tracking topic salience
 
@@ -327,7 +344,8 @@ they conducted another missile test on Monday.
 ```{r}
 ## search tweets mentioning north korea (missle test on Monday)
 nk <- search_tweets(
-    "north korea", n = 18000, include_rts = FALSE)
+    "north korea", n = 18000, include_rts = FALSE
+)
 ```
 
 Then I searched for tweets mentioning "CBO health care" (in any order, 
@@ -336,13 +354,18 @@ anywhere in the tweet), since I know the CBO was released on Wednesday.
 ```{r}
 ## search for tweets about the CBO (released on Wed.)
 cbo <- search_tweets(
-    "CBO health care", n = 18000, include_rts = FALSE)
+    "CBO health care", n = 18000, include_rts = FALSE
+)
 ```
 
 And then I combined the two data sets into one big data frame.
 
 ```{r}
-## cbind into one data frame
+## create query (search) variable
+cbo$query <- "CBO health care"
+nk$query <- "North Korea"
+
+## row bind into single data frame
 df <- rbind(cbo, nk)
 ```
 
@@ -355,36 +378,106 @@ will use that to classify groups. In the code below, I applied `plain_tweets`
 to the text to create a new variable, and then specified that I wanted to 
 apply the filters to that variable by using the `txt` argument in `ts_plot`.
 
-```{r}
+```{r, eval=TRUE}
 ## create plain tweets variable
 df$text_plain <- plain_tweets(df$text)
 
 ## filter by search topic
-p3 <- ts_plot(df, by = "15 mins",
-             filter = c("cbo|health|care|bill|insured|deficit|budget",
-                        "korea|kim|jung un|missile"),
-             key = c("CBO", "NKorea"),
-             txt = "text_plain")
+p3 <- ts_plot(
+    df, by = "15 mins",
+    filter = c("cbo|health|care|bill|insured|deficit|budget",
+               "korea|kim|jung un|missile"),
+    key = c("CBO", "NKorea"),
+    txt = "text_plain"
+)
 ```
 
 Now it's easy to add more layers and make this plot look nice.
 
-```{r}
-## add theme and style plot
-p3 <- p3 + theme_ica17() +
-    geom_line(size = 1) +
-    scale_color_manual(values = c("#cc1111", "#0022cc")) +
-    theme(legend.title = element_blank()) +
+```{r, eval=TRUE}
+## add theme and more style layers
+p3 <- p3 + 
+    theme_ica17() +
     scale_x_datetime(date_labels = "%b %d %H:%m") +
-    labs(x = NULL, y = NULL, title = "Tracing topic salience in Twitter statuses",
-         subtitle = "Tweets (N = 23,467) were aggregated in 15-minute intervals. Retweets were not included.")
+    theme(legend.title = element_blank()) +
+    labs(x = NULL, y = NULL, 
+         title = "Tracing topic salience in Twitter statuses",
+         subtitle = paste("Tweets (N = 23,467) were aggregated in 15-minute",
+                          "intervals. Retweets were not included.")
+    )
 
 ## render plot
 p3
 ```
 
-<p align="center">
+<!-- <p align="center">
 <img src="img/p3.png" alt="p3">
-</p>
+</p> -->
+
+
+## Get sentiment analysis
+
+```{r}
+## conduct sentiment analysis
+sa <- syuzhet::get_nrc_sentiment(df$text_plain)
+```
+
+```{r, eval=TRUE}
+## view output
+tibble::as_tibble(sa)
+
+## bind columns
+df <- cbind(df, sa)
+```
+
+## Aggregating features of Twitter statuses using dplyr
+
+```{r, eval=TRUE}
+## load dplyr
+suppressPackageStartupMessages(library(dplyr))
+
+## create function for aggregating date-time vectors
+round_time <- function(x, interval = 60) {
+    ## round off to lowest value
+    rounded <- floor(as.numeric(x) / interval)
+    ## center so value is interval mid-point
+    rounded <- rounded + round(interval * .5, 0)
+    ## return to date-time
+    as.POSIXct(rounded * interval, origin = "1970-01-01")
+}
+
+## use pipe (%>%) operator for linear syntax
+long_emotion_ts <- df %>%
+    ## select variables (columns) of interest
+    dplyr::select(created_at, query, anger:positive) %>%
+    ## convert created_at variable to desired interval 
+    ## here I chose hours (60 seconds * 60 mins = 1 hour)
+    mutate(created_at = round_time(created_at, 60 * 60)) %>%
+    ## transform data to long form
+    tidyr::gather(sentiment, score, -created_at, -query) %>%
+    ## group by time, query, and sentiment
+    group_by(created_at, query, sentiment) %>%
+    ## get mean for each grouping
+    summarize(score = mean(score, na.rm = TRUE))
+
+## view data
+long_emotion_ts
+```
+
+
+```{r, eval=TRUE}
+## plot data
+long_emotion_ts %>%
+    ggplot(aes(x = created_at, y = score, color = query)) + 
+    geom_point() + 
+    geom_smooth(method = "loess") + 
+    facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
+    theme_ica17() + 
+    theme(legend.position = "bottom", 
+          axis.text = element_text(size = 9),
+          legend.title = element_blank()) + 
+    scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
+```
+
 
 And that's it!

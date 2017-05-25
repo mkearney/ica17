@@ -1,6 +1,4 @@
----
-output: github_document
----
+
 
 
 
@@ -137,7 +135,7 @@ last_status_id <-  ica17$status_id[nrow(ica17)]
 
 ## pass last_status_id to max_id and run search again.
 ica17_contd <- search_tweets(
-    "ica17 OR #ica2017", n = 18000, include_rts = FALSE,
+    "#ica17 OR #ica2017", n = 18000, include_rts = FALSE,
     max_id = last_status_id
 )
 ```
@@ -163,6 +161,39 @@ of time. Hence, the "ts" (time series) naming convention. In addition
 to aggregating the frequency of statuses, `ts_plot` will also 
 plot the time series.
 
+
+```r
+## aggregate freq of tweets in one-hour intervals
+agg <- ts_filter(ica17, by = "hours")
+
+## view data
+agg
+```
+
+```
+## # A tibble: 212 x 3
+##                   time  freq filter
+##                 <dttm> <dbl>  <chr>
+##  1 2017-05-16 20:00:00     2       
+##  2 2017-05-16 21:00:00     0       
+##  3 2017-05-16 22:00:00     0       
+##  4 2017-05-16 23:00:00     0       
+##  5 2017-05-17 00:00:00     1       
+##  6 2017-05-17 01:00:00     0       
+##  7 2017-05-17 02:00:00     0       
+##  8 2017-05-17 03:00:00     0       
+##  9 2017-05-17 04:00:00     0       
+## 10 2017-05-17 05:00:00     0       
+## # ... with 202 more rows
+```
+
+```r
+## plot data
+ts_plot(agg)
+```
+
+![](index_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 The plot produced by `ts_plot` depends on whether the user has 
 installed *ggplot2*, which is a suggested but not required package 
 dependency for *rtweet*. If you haven't installed *ggplot2* then 
@@ -174,14 +205,13 @@ you can easily add layers and customize the plot to your liking.
 ```r
 ## load ggplot2
 library(ggplot2)
-
-## aggregate freq of tweets in one-hour intervals
-agg <- ts_filter(ica17, by = "hours")
+```
 
 
+```r
 ## plot a time series of tweets, aggregating by one-hour intervals
 p1 <- ts_plot(ica17, "hours") +
-    ggplot2::labs(
+    labs(
         x = "Date and time",
         y = "Frequency of tweets",
         title = "Time series of #ICA17 tweets",
@@ -194,9 +224,11 @@ p1 <- ts_plot(ica17, "hours") +
 p1
 ```
 
-<p align="center">
+![](index_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+<!-- <p align="center">
 <img src="img/p1.png" alt="p1">
-</p>
+</p> -->
 
 ## Analyzing text
 
@@ -205,25 +237,18 @@ The second convenenience function for analysing tweets is
 the tweets down to plain text. Because there are already variables included 
 in the default tweets data that contain links, hashtags, and mentions, those 
 entities are stripped out of the text as well. What's returned are lower 
-case words. Below I've applied the function to the first 10 ICA17 tweets.
+case words. Below I've applied the function to the first few ICA17 tweets.
 
 
 ```r
 ## strip text of tweets
-plain_tweets(ica17$text[1:10])
+plain_tweets(ica17$text[1:3])
 ```
 
 ```
-##  [1] "good news finally on the train down to san diego for"                                                   
-##  [2] "grest to be in sunny and happy san diego for looking foreard to intellectual nourishment and having fun"
-##  [3] "its a tough life here at the in san diego"                                                              
-##  [4] "hey grad students early career scholars remember to join us on monday morning"                          
-##  [5] "conversely the webpage says our mtg goes to the reception starts at requiring us all to develop clones" 
-##  [6] "off to see some tunes before reconnecting with colleagues alums at oh and presenting research"          
-##  [7] "can you hear me now phreaking the party line from operators to occupy by"                               
-##  [8] "thanks to for some herculean livetweeting from today looking forward to day program"                    
-##  [9] "civic engagement means no shortcuts if we want to make freedom ring we have to phreak democracy"        
-## [10] "business mtg reception on sunday"
+## [1] "excellent posttruth preconference heres some background"
+## [2] "panel w"                                                
+## [3] "nato"
 ```
 
 The `plain_tweets` function is relatively straight forward at cutting
@@ -236,61 +261,19 @@ text words for each tweet.
 ```r
 ## tokenize by word
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
-wrds[1:10]
+wrds[1:3]
 ```
 
 ```
 ## [[1]]
-##  [1] "good"    "news"    "finally" "on"      "the"     "train"  
-##  [7] "down"    "to"      "san"     "diego"   "for"    
+## [1] "excellent"     "posttruth"     "preconference" "heres"        
+## [5] "some"          "background"   
 ## 
 ## [[2]]
-##  [1] "grest"        "to"           "be"           "in"          
-##  [5] "sunny"        "and"          "happy"        "san"         
-##  [9] "diego"        "for"          "looking"      "foreard"     
-## [13] "to"           "intellectual" "nourishment"  "and"         
-## [17] "having"       "fun"         
+## [1] "panel" "w"    
 ## 
 ## [[3]]
-##  [1] "its"   "a"     "tough" "life"  "here"  "at"    "the"   "in"   
-##  [9] "san"   "diego"
-## 
-## [[4]]
-##  [1] "hey"      "grad"     "students" "early"    "career"   "scholars"
-##  [7] "remember" "to"       "join"     "us"       "on"       "monday"  
-## [13] "morning" 
-## 
-## [[5]]
-##  [1] "conversely" "the"        "webpage"    "says"       "our"       
-##  [6] "mtg"        "goes"       "to"         "the"        "reception" 
-## [11] "starts"     "at"         "requiring"  "us"         "all"       
-## [16] "to"         "develop"    "clones"    
-## 
-## [[6]]
-##  [1] "off"          "to"           "see"          "some"        
-##  [5] "tunes"        "before"       "reconnecting" "with"        
-##  [9] "colleagues"   "alums"        "at"           "oh"          
-## [13] "and"          "presenting"   "research"    
-## 
-## [[7]]
-##  [1] "can"       "you"       "hear"      "me"        "now"      
-##  [6] "phreaking" "the"       "party"     "line"      "from"     
-## [11] "operators" "to"        "occupy"    "by"       
-## 
-## [[8]]
-##  [1] "thanks"       "to"           "for"          "some"        
-##  [5] "herculean"    "livetweeting" "from"         "today"       
-##  [9] "looking"      "forward"      "to"           "day"         
-## [13] "program"     
-## 
-## [[9]]
-##  [1] "civic"      "engagement" "means"      "no"         "shortcuts" 
-##  [6] "if"         "we"         "want"       "to"         "make"      
-## [11] "freedom"    "ring"       "we"         "have"       "to"        
-## [16] "phreak"     "democracy" 
-## 
-## [[10]]
-## [1] "business"  "mtg"       "reception" "on"        "sunday"
+## [1] "nato"
 ```
 
 This can easily be converted into a word count [frequency] table, but 
@@ -302,14 +285,28 @@ to tell us a lot about our specific topic / set of tweets.
 ## get word counts
 wrds <- table(unlist(wrds))
 
-## view top 10 words
-head(sort(wrds, decreasing = TRUE), 10)
+## view top 40 words
+head(sort(wrds, decreasing = TRUE), 40)
 ```
 
 ```
 ## 
-## the  to  of and  in for  on   a  at  is 
-## 334 288 201 189 184 178 142 127 125  87
+##           the            to            of           and            in 
+##           614           504           429           388           363 
+##           for            on            at             a            is 
+##           290           284           247           235           181 
+##          from         media         about            as           san 
+##           121           115           111           110           110 
+##          with         diego            be             i          this 
+##           108           105            98            92            91 
+##            we            by           you           are           our 
+##            90            88            85            78            76 
+## preconference            my            it        social          that 
+##            75            71            66            65            63 
+##          data           not           see      research communication 
+##            61            60            59            55            52 
+##           now           but            up         great            us 
+##            51            50            50            49            49
 ```
 
 See, these words don't appear to be very unique to ICA 2017. Of course, we could always
@@ -323,11 +320,10 @@ by the boolean ` OR `. It's a bit hacky, but it returns massive amounts of
 tweets about a wide range of topics. So, if we can identify the *unique* words 
 used in our sample, we may yet accomplish our goal. 
 
-In the code below, I've 
-excluded retweets since those add unnecessary redundancies (and, ideally, we'd
-want a diverse pool of tweets). It's still not perfect, but it gives us a 
-systematic starting point that I imagine could be developed into a more 
-reliable method.
+In the code below, I've excluded retweets since those add unnecessary 
+redundancies (and, ideally, we'd want a diverse pool of tweets). It's 
+still not perfect, but it gives us a systematic starting point that 
+I imagine could be developed into a more reliable method.
 
 
 ```r
@@ -363,22 +359,22 @@ head(sort(wrds, decreasing = TRUE), 40)
 
 ```
 ## 
-##         diego        indigo      politics preconference    conference 
-##            76            44            27            22            20 
-##       forward      ballroom      altheide          join       excited 
-##            20            18            17            17            16 
-##      research       session      populism      schedule       digital 
-##            16            16            15            15            14 
-##          fear       hashtag        online     highfield           net 
-##            14            14            14            13            13 
-##        papers      populist     reception    technology    presenting 
-##            13            13            13            13            12 
-##      sapphire      congrats        friday        kraidy    litherland 
-##            12            11            11            11            11 
-##      oullette         paper         hearn           ica        mobile 
-##            11            11            10            10            10 
-##    munication         panel      students        trumps        yilmaz 
-##            10            10            10            10            10
+##         diego preconference          data      research communication 
+##           105            75            61            55            52 
+##      politics    conference        indigo     political       excited 
+##            48            42            40            37            36 
+##       forward         panel       preconf    presenting          comm 
+##            34            29            29            29            26 
+##        online         paper       digital      populism      ballroom 
+##            25            24            23            23            19 
+##     discourse           ica          nato       session      altheide 
+##            19            19            19            19            18 
+##       between          join      populist   interesting         hills 
+##            18            18            18            17            16 
+##    technology          fear        friday       hashtag        papers 
+##            16            15            15            15            15 
+##  presentation      sapphire      schedule      scholars      students 
+##            15            15            15            15            15
 ```
 
 That turned out well! These words look a lot more unique to the
@@ -391,18 +387,22 @@ cols <- sample(rainbow(10, s = .5, v = .75), 10)
 
 ## plot word cloud
 par(bg = "black")
-wordcloud::wordcloud(
+suppressWarnings(wordcloud::wordcloud(
     words = names(wrds),
     freq = wrds,
+    min.freq = 5,
     random.color = FALSE,
     colors = cols,
     family = "Roboto Condensed",
-    scale = c(4.5, .4))
+    scale = c(4, .25))
+)
 ```
 
-<p align="center">
+![](index_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+
+<!-- <p align="center">
 <img src="img/p2.png" alt="p2">
-</p>
+</p> -->
 
 ## Tracking topic salience
 
@@ -418,7 +418,8 @@ they conducted another missile test on Monday.
 ```r
 ## search tweets mentioning north korea (missle test on Monday)
 nk <- search_tweets(
-    "north korea", n = 18000, include_rts = FALSE)
+    "north korea", n = 18000, include_rts = FALSE
+)
 ```
 
 Then I searched for tweets mentioning "CBO health care" (in any order, 
@@ -428,14 +429,19 @@ anywhere in the tweet), since I know the CBO was released on Wednesday.
 ```r
 ## search for tweets about the CBO (released on Wed.)
 cbo <- search_tweets(
-    "CBO health care", n = 18000, include_rts = FALSE)
+    "CBO health care", n = 18000, include_rts = FALSE
+)
 ```
 
 And then I combined the two data sets into one big data frame.
 
 
 ```r
-## cbind into one data frame
+## create query (search) variable
+cbo$query <- "CBO health care"
+nk$query <- "North Korea"
+
+## row bind into single data frame
 df <- rbind(cbo, nk)
 ```
 
@@ -454,32 +460,150 @@ apply the filters to that variable by using the `txt` argument in `ts_plot`.
 df$text_plain <- plain_tweets(df$text)
 
 ## filter by search topic
-p3 <- ts_plot(df, by = "15 mins",
-             filter = c("cbo|health|care|bill|insured|deficit|budget",
-                        "korea|kim|jung un|missile"),
-             key = c("CBO", "NKorea"),
-             txt = "text_plain")
+p3 <- ts_plot(
+    df, by = "15 mins",
+    filter = c("cbo|health|care|bill|insured|deficit|budget",
+               "korea|kim|jung un|missile"),
+    key = c("CBO", "NKorea"),
+    txt = "text_plain"
+)
 ```
 
 Now it's easy to add more layers and make this plot look nice.
 
 
 ```r
-## add theme and style plot
-p3 <- p3 + theme_ica17() +
-    geom_line(size = 1) +
-    scale_color_manual(values = c("#cc1111", "#0022cc")) +
-    theme(legend.title = element_blank()) +
+## add theme and more style layers
+p3 <- p3 + 
+    theme_ica17() +
     scale_x_datetime(date_labels = "%b %d %H:%m") +
-    labs(x = NULL, y = NULL, title = "Tracing topic salience in Twitter statuses",
-         subtitle = "Tweets (N = 23,467) were aggregated in 15-minute intervals. Retweets were not included.")
+    theme(legend.title = element_blank()) +
+    labs(x = NULL, y = NULL, 
+         title = "Tracing topic salience in Twitter statuses",
+         subtitle = paste("Tweets (N = 23,467) were aggregated in 15-minute",
+                          "intervals. Retweets were not included.")
+    )
 
 ## render plot
 p3
 ```
 
-<p align="center">
+![](index_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+
+<!-- <p align="center">
 <img src="img/p3.png" alt="p3">
-</p>
+</p> -->
+
+
+## Get sentiment analysis
+
+
+```r
+## conduct sentiment analysis
+sa <- syuzhet::get_nrc_sentiment(df$text_plain)
+```
+
+
+```r
+## view output
+tibble::as_tibble(sa)
+```
+
+```
+## # A tibble: 23,467 x 10
+##    anger anticipation disgust  fear   joy sadness surprise trust
+##    <dbl>        <dbl>   <dbl> <dbl> <dbl>   <dbl>    <dbl> <dbl>
+##  1     1            0       0     1     0       1        0     0
+##  2     0            0       0     0     0       0        0     1
+##  3     0            0       0     0     0       1        1     0
+##  4     0            0       0     0     0       1        1     0
+##  5     0            0       0     0     0       1        1     0
+##  6     0            0       0     0     0       0        0     0
+##  7     0            1       0     0     0       0        0     1
+##  8     0            0       0     0     0       0        0     0
+##  9     0            0       0     0     0       1        1     0
+## 10     0            0       1     0     0       1        0     0
+## # ... with 23,457 more rows, and 2 more variables: negative <dbl>,
+## #   positive <dbl>
+```
+
+```r
+## bind columns
+df <- cbind(df, sa)
+```
+
+## Aggregating features of Twitter statuses using dplyr
+
+
+```r
+## load dplyr
+suppressPackageStartupMessages(library(dplyr))
+
+## create function for aggregating date-time vectors
+round_time <- function(x, interval = 60) {
+    ## round off to lowest value
+    rounded <- floor(as.numeric(x) / interval)
+    ## center so value is interval mid-point
+    rounded <- rounded + round(interval * .5, 0)
+    ## return to date-time
+    as.POSIXct(rounded * interval, origin = "1970-01-01")
+}
+
+## use pipe (%>%) operator for linear syntax
+long_emotion_ts <- df %>%
+    ## select variables (columns) of interest
+    dplyr::select(created_at, query, anger:positive) %>%
+    ## convert created_at variable to desired interval 
+    ## here I chose hours (60 seconds * 60 mins = 1 hour)
+    mutate(created_at = round_time(created_at, 60 * 60)) %>%
+    ## transform data to long form
+    tidyr::gather(sentiment, score, -created_at, -query) %>%
+    ## group by time, query, and sentiment
+    group_by(created_at, query, sentiment) %>%
+    ## get mean for each grouping
+    summarize(score = mean(score, na.rm = TRUE))
+
+## view data
+long_emotion_ts
+```
+
+```
+## Source: local data frame [720 x 4]
+## Groups: created_at, query [?]
+## 
+## # A tibble: 720 x 4
+##             created_at           query    sentiment     score
+##                 <dttm>           <chr>        <chr>     <dbl>
+##  1 2017-08-06 07:00:00 CBO health care        anger 0.1428571
+##  2 2017-08-06 07:00:00 CBO health care anticipation 1.2857143
+##  3 2017-08-06 07:00:00 CBO health care      disgust 0.0000000
+##  4 2017-08-06 07:00:00 CBO health care         fear 0.1428571
+##  5 2017-08-06 07:00:00 CBO health care          joy 1.0000000
+##  6 2017-08-06 07:00:00 CBO health care     negative 0.0000000
+##  7 2017-08-06 07:00:00 CBO health care     positive 1.8571429
+##  8 2017-08-06 07:00:00 CBO health care      sadness 0.0000000
+##  9 2017-08-06 07:00:00 CBO health care     surprise 1.0000000
+## 10 2017-08-06 07:00:00 CBO health care        trust 0.1428571
+## # ... with 710 more rows
+```
+
+
+
+```r
+## plot data
+long_emotion_ts %>%
+    ggplot(aes(x = created_at, y = score, color = query)) + 
+    geom_point() + 
+    geom_smooth(method = "loess") + 
+    facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
+    theme_ica17() + 
+    theme(legend.position = "bottom", 
+          axis.text = element_text(size = 9),
+          legend.title = element_blank()) + 
+    scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
+```
+
+![](index_files/figure-html/unnamed-chunk-26-1.png)<!-- -->
+
 
 And that's it!
