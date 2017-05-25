@@ -264,6 +264,7 @@ Create simple word cloud to visualize.
 cols <- sample(rainbow(10, s = .5, v = .75), 10)
 
 ## plot word cloud
+par(bg = "black")
 wordcloud::wordcloud(
     words = names(wrds),
     freq = wrds,
