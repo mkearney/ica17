@@ -78,9 +78,8 @@ Searching for tweets is easy.
 library(rtweet)
 
 ## search for tweets containing ICA17 or ICA2017 (not case sensitive)
-ica17 <- search_tweets("ICA17 OR ICA2017", n = 1000)
+ica17 <- search_tweets("#ica17 OR #ica2017", n = 10000, include_rts = FALSE)
 ```
-
 
 If you haven't downloaded ggplot2 yet, the plot that's created will
 look a little different than the plot below. That's because ggplot2 is
@@ -106,3 +105,38 @@ ts_plot(ica17, "hours") +
 <img src="img/ica17tweets.png" alt="ica17tweets">
 </p>
 
+
+
+## Analyzing text
+
+```{r}
+## strip text of tweets
+plain_tweets(ica17$text[1:10])
+
+## tokenize by word
+wrds <- plain_tweets(ica17$text, tokenize = TRUE)
+
+## freq table of all words
+wrds <- table(unlist(wrds))
+
+## get stop words
+stopwords <- search_tweets(paste(letters, collapse = " OR "), n = 1000, include_rts = FALSE)
+stopwords <- plain_tweets(stopwords$text, tokenize = TRUE)
+stopwords <- table(unlist(stopwords))
+
+## rm stop words
+wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > 10L])]
+
+## word cloud
+par(bg = "black")
+cols <- sample(rainbow(10, s = .5, v = .75), 10)
+png("../docs/img/wordcloud.png", 7, 7, "in", res = 127.5)
+wordcloud::wordcloud(names(wrds), wrds, min.freq = 5, random.color = FALSE, colors = cols,
+                     family = "Roboto Condensed", font = 1, scale = c(4.75, .75))
+dev.off()
+```
+
+
+<p align="center">
+<img src="img/wordcloud.png" alt="wordcloud">
+</p>
