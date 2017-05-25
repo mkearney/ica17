@@ -15,7 +15,3 @@ md2docs <- function() {
 }
 
 md2docs()
-
-
-function() {
-    }

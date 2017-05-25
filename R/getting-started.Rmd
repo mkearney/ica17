@@ -128,9 +128,9 @@ stopwords <- table(unlist(stopwords))
 wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > 10L])]
 
 ## word cloud
-par(bg = "black")
 cols <- sample(rainbow(10, s = .5, v = .75), 10)
 png("../docs/img/wordcloud.png", 7, 7, "in", res = 127.5)
+par(bg = "black")
 wordcloud::wordcloud(names(wrds), wrds, min.freq = 5, random.color = FALSE, colors = cols,
                      family = "Roboto Condensed", font = 1, scale = c(4.75, .75))
 dev.off()
