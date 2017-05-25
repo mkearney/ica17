@@ -162,10 +162,120 @@ text words for each tweet.
 ```r
 ## tokenize by word
 plain_tweets(ica17$text[1:10], tokenize = TRUE)
+```
 
+```
+## [[1]]
+##  [1] "good"    "news"    "finally" "on"      "the"     "train"  
+##  [7] "down"    "to"      "san"     "diego"   "for"    
+## 
+## [[2]]
+##  [1] "grest"        "to"           "be"           "in"          
+##  [5] "sunny"        "and"          "happy"        "san"         
+##  [9] "diego"        "for"          "looking"      "foreard"     
+## [13] "to"           "intellectual" "nourishment"  "and"         
+## [17] "having"       "fun"         
+## 
+## [[3]]
+##  [1] "its"   "a"     "tough" "life"  "here"  "at"    "the"   "in"   
+##  [9] "san"   "diego"
+## 
+## [[4]]
+##  [1] "hey"      "grad"     "students" "early"    "career"   "scholars"
+##  [7] "remember" "to"       "join"     "us"       "on"       "monday"  
+## [13] "morning" 
+## 
+## [[5]]
+##  [1] "conversely" "the"        "webpage"    "says"       "our"       
+##  [6] "mtg"        "goes"       "to"         "the"        "reception" 
+## [11] "starts"     "at"         "requiring"  "us"         "all"       
+## [16] "to"         "develop"    "clones"    
+## 
+## [[6]]
+##  [1] "off"          "to"           "see"          "some"        
+##  [5] "tunes"        "before"       "reconnecting" "with"        
+##  [9] "colleagues"   "alums"        "at"           "oh"          
+## [13] "and"          "presenting"   "research"    
+## 
+## [[7]]
+##  [1] "can"       "you"       "hear"      "me"        "now"      
+##  [6] "phreaking" "the"       "party"     "line"      "from"     
+## [11] "operators" "to"        "occupy"    "by"       
+## 
+## [[8]]
+##  [1] "thanks"       "to"           "for"          "some"        
+##  [5] "herculean"    "livetweeting" "from"         "today"       
+##  [9] "looking"      "forward"      "to"           "day"         
+## [13] "program"     
+## 
+## [[9]]
+##  [1] "civic"      "engagement" "means"      "no"         "shortcuts" 
+##  [6] "if"         "we"         "want"       "to"         "make"      
+## [11] "freedom"    "ring"       "we"         "have"       "to"        
+## [16] "phreak"     "democracy" 
+## 
+## [[10]]
+## [1] "business"  "mtg"       "reception" "on"        "sunday"
+```
+
+```r
 ## get words
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
 wrds[1:10]
+```
+
+```
+## [[1]]
+##  [1] "good"    "news"    "finally" "on"      "the"     "train"  
+##  [7] "down"    "to"      "san"     "diego"   "for"    
+## 
+## [[2]]
+##  [1] "grest"        "to"           "be"           "in"          
+##  [5] "sunny"        "and"          "happy"        "san"         
+##  [9] "diego"        "for"          "looking"      "foreard"     
+## [13] "to"           "intellectual" "nourishment"  "and"         
+## [17] "having"       "fun"         
+## 
+## [[3]]
+##  [1] "its"   "a"     "tough" "life"  "here"  "at"    "the"   "in"   
+##  [9] "san"   "diego"
+## 
+## [[4]]
+##  [1] "hey"      "grad"     "students" "early"    "career"   "scholars"
+##  [7] "remember" "to"       "join"     "us"       "on"       "monday"  
+## [13] "morning" 
+## 
+## [[5]]
+##  [1] "conversely" "the"        "webpage"    "says"       "our"       
+##  [6] "mtg"        "goes"       "to"         "the"        "reception" 
+## [11] "starts"     "at"         "requiring"  "us"         "all"       
+## [16] "to"         "develop"    "clones"    
+## 
+## [[6]]
+##  [1] "off"          "to"           "see"          "some"        
+##  [5] "tunes"        "before"       "reconnecting" "with"        
+##  [9] "colleagues"   "alums"        "at"           "oh"          
+## [13] "and"          "presenting"   "research"    
+## 
+## [[7]]
+##  [1] "can"       "you"       "hear"      "me"        "now"      
+##  [6] "phreaking" "the"       "party"     "line"      "from"     
+## [11] "operators" "to"        "occupy"    "by"       
+## 
+## [[8]]
+##  [1] "thanks"       "to"           "for"          "some"        
+##  [5] "herculean"    "livetweeting" "from"         "today"       
+##  [9] "looking"      "forward"      "to"           "day"         
+## [13] "program"     
+## 
+## [[9]]
+##  [1] "civic"      "engagement" "means"      "no"         "shortcuts" 
+##  [6] "if"         "we"         "want"       "to"         "make"      
+## [11] "freedom"    "ring"       "we"         "have"       "to"        
+## [16] "phreak"     "democracy" 
+## 
+## [[10]]
+## [1] "business"  "mtg"       "reception" "on"        "sunday"
 ```
 
 This can easily be converted into a word count [frequency] table, but 
@@ -179,6 +289,12 @@ wrds <- table(unlist(wrds))
 
 ## view top 10 words
 head(sort(wrds, decreasing = TRUE), 10)
+```
+
+```
+## 
+## the  to  of and  in for  on   a  at  is 
+## 334 288 201 189 184 178 142 127 125  87
 ```
 
 See, these words don't appear to be very unique to ICA 2017. Of course, we could always

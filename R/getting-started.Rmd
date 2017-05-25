@@ -155,7 +155,7 @@ easy analysis. For that, you can use the `tokenize` argument in
 `plain_tweets`. The tokenize argument will return a vector of plain 
 text words for each tweet.
 
-```{r}
+```{r, eval=TRUE}
 ## tokenize by word
 plain_tweets(ica17$text[1:10], tokenize = TRUE)
 
@@ -168,7 +168,7 @@ This can easily be converted into a word count [frequency] table, but
 it still leaves one problem. The most common words probably aren't going 
 to tell us a lot about our specific topic / set of tweets.
 
-```{r}
+```{r, eval=TRUE}
 ## get word counts
 wrds <- table(unlist(wrds))
 
