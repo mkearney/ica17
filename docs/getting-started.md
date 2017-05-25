@@ -209,11 +209,15 @@ head(sort(wrds, decreasing = TRUE), 10)
 ## 334 288 201 189 184 178 142 127 125  87
 ```
 
-We can create our own dictionary of stop words by locating overlap
-between our sample and a more general sample of tweets. We can get a
-more general sample by searching for each letter in the alphabet with
-separated by ` OR ` (boolean logic used by Twitter). I've done that
-below to get five thousand tweets.
+These words don't appear to be very unique to ICA. We could always
+grab a premade list of stopwords, but those are unlikely to reflect
+the medium here. With rtweet it's possible to create your own
+dictionary of stop words by locating overlap between (a) a sample of
+tweets of interest and (b) a more *general* sample of tweets. We can
+accomplish this by searching for each letter in the alphabet separated
+by the boolean ` OR `. Reduce the redundancies by excluding retweets
+and you'll easily pull in tens of thousands of tweets. It's still not
+perfect, but it gives us a systematic starting point.
 
 
 
@@ -258,7 +262,8 @@ head(sort(wrds, decreasing = TRUE), 40)
 ##            10            10            10            10            10
 ```
 
-Create simple word cloud to visualize.
+That turned out well! Those words look a lot more unique to the
+topic. We can quickly survey a lot of the words with a simple word cloud.
 
 
 ```r
@@ -281,6 +286,10 @@ wordcloud::wordcloud(
 </p>
 
 ### Tracking topic salience
+
+If we wanted to model the topics of tweets, we could conduct two
+searches for tweets over the same time period. And then compare the
+frequencies of tweets over time using time series.
 
 
 ```r
