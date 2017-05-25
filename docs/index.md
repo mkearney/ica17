@@ -159,23 +159,25 @@ p1
 
 ### plain\_tweets
 
-The second convenenience function for analysing tweets is `plain_tweets`. As you might guess, `plain_tweets` strips the text of the tweets down to plain text. Because there are already variables included in the default tweets data that contain links, hashtags, and mentions, those entities are stripped out of the text as well. What's returned are lower case words. Below I've applied the function to the first few ICA17 tweets.
+The second convenience function for analysing tweets is `plain_tweets`. As you might guess, `plain_tweets` strips the text of the tweets down to plain text. Because there are already variables included in the default tweets data that contain links, hashtags, and mentions, those entities are stripped out of the text as well. What's returned are lower case words. Below I've applied the function to the first few ICA17 tweets.
 
 ``` r
 ## strip text of tweets
-plain_tweets(ica17$text[1:3])
+plain_tweets(ica17$text[1:5])
 ```
 
-    ## [1] "excellent posttruth preconference heres some background"
-    ## [2] "panel w"                                                
-    ## [3] "nato"
+    ## [1] "excellent posttruth preconference heres some background"                   
+    ## [2] "panel w"                                                                   
+    ## [3] "nato"                                                                      
+    ## [4] ""                                                                          
+    ## [5] "inspiring talk by about creating engaging progressive and subversive media"
 
 The `plain_tweets` function is relatively straight forward at cutting through the clutter, but it still may not prepare you for quick and easy analysis. For that, you can use the `tokenize` argument in `plain_tweets`. The tokenize argument will return a vector of plain text words for each tweet.
 
 ``` r
 ## tokenize by word
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
-wrds[1:3]
+wrds[1:5]
 ```
 
     ## [[1]]
@@ -187,6 +189,14 @@ wrds[1:3]
     ## 
     ## [[3]]
     ## [1] "nato"
+    ## 
+    ## [[4]]
+    ## character(0)
+    ## 
+    ## [[5]]
+    ##  [1] "inspiring"   "talk"        "by"          "about"      
+    ##  [5] "creating"    "engaging"    "progressive" "and"        
+    ##  [9] "subversive"  "media"
 
 ### Identifying stop words
 

@@ -221,7 +221,7 @@ p1
 
 ### plain_tweets
 
-The second convenenience function for analysing tweets is
+The second convenience function for analysing tweets is
 `plain_tweets`. As you might guess, `plain_tweets` strips the text of
 the tweets down to plain text. Because there are already variables included 
 in the default tweets data that contain links, hashtags, and mentions, those 
@@ -230,7 +230,7 @@ case words. Below I've applied the function to the first few ICA17 tweets.
 
 ```{r, eval=TRUE}
 ## strip text of tweets
-plain_tweets(ica17$text[1:3])
+plain_tweets(ica17$text[1:5])
 ```
 
 The `plain_tweets` function is relatively straight forward at cutting
@@ -242,7 +242,7 @@ text words for each tweet.
 ```{r, eval=TRUE}
 ## tokenize by word
 wrds <- plain_tweets(ica17$text, tokenize = TRUE)
-wrds[1:3]
+wrds[1:5]
 ```
 
 ### Identifying stop words
