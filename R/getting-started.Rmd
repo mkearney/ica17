@@ -182,7 +182,9 @@ tweets of interest and (b) a more *general* sample of tweets.
 To do this, we're going to search for each letter of the alphabet separated
 by the boolean ` OR `. It's a bit hacky, but it returns massive amounts of 
 tweets about a wide range of topics. So, if we can identify the *unique* words 
-used in our sample, we may yet accomplish our goal. In the code below, I've 
+used in our sample, we may yet accomplish our goal. 
+
+In the code below, I've 
 excluded retweets since those add unnecessary redundancies (and, ideally, we'd
 want a diverse pool of tweets). It's still not perfect, but it gives us a 
 systematic starting point that I imagine could be developed into a more 
@@ -206,7 +208,7 @@ Now that we've identified the frequencies of words in this more general pool
 of tweets, we can exclude all ICA tweet words that appear more than N number of 
 times in the general pool.
 
-```{r}
+```{r, eval=TRUE}
 ## cutoff
 N <- 5L
 

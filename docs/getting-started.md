@@ -247,7 +247,9 @@ tweets of interest and (b) a more *general* sample of tweets.
 To do this, we're going to search for each letter of the alphabet separated
 by the boolean ` OR `. It's a bit hacky, but it returns massive amounts of 
 tweets about a wide range of topics. So, if we can identify the *unique* words 
-used in our sample, we may yet accomplish our goal. In the code below, I've 
+used in our sample, we may yet accomplish our goal. 
+
+In the code below, I've 
 excluded retweets since those add unnecessary redundancies (and, ideally, we'd
 want a diverse pool of tweets). It's still not perfect, but it gives us a 
 systematic starting point that I imagine could be developed into a more 
@@ -283,6 +285,26 @@ wrds <- wrds[!names(wrds) %in% names(stopwords[stopwords > N])]
 
 ## check top words again
 head(sort(wrds, decreasing = TRUE), 40)
+```
+
+```
+## 
+##         diego        indigo      politics preconference    conference 
+##            76            44            27            22            20 
+##       forward      ballroom      altheide          join       excited 
+##            20            18            17            17            16 
+##      research       session      populism      schedule       digital 
+##            16            16            15            15            14 
+##          fear       hashtag        online     highfield           net 
+##            14            14            14            13            13 
+##        papers      populist     reception    technology    presenting 
+##            13            13            13            13            12 
+##      sapphire      congrats        friday        kraidy    litherland 
+##            12            11            11            11            11 
+##      oullette         paper         hearn           ica        mobile 
+##            11            11            10            10            10 
+##    munication         panel      students        trumps        yilmaz 
+##            10            10            10            10            10
 ```
 
 That turned out well! These words look a lot more unique to the
