@@ -1,8 +1,7 @@
 ---
 title: "Introduction to rtweet: Collecting Twitter data"
-author: "Michael W. Kearney  
-
-University of Kansas"
+author: "Michael W. Kearney"
+date: "May 25, 2017"
 output: 
   github_document: 
     toc: yes
@@ -462,14 +461,15 @@ long_emotion_ts <- df %>%
     ## select variables (columns) of interest
     dplyr::select(created_at, query, anger:positive) %>%
     ## convert created_at variable to desired interval 
-    ## here I chose hours (60 seconds * 60 mins = 1 hour)
-    mutate(created_at = round_time(created_at, 60 * 60)) %>%
+    ## here I chose 6 hour intervals (3 * 60 seconds * 60 mins = 3 hours)
+    mutate(created_at = round_time(created_at, 3 * 60 * 60)) %>%
     ## transform data to long form
     tidyr::gather(sentiment, score, -created_at, -query) %>%
     ## group by time, query, and sentiment
     group_by(created_at, query, sentiment) %>%
     ## get mean for each grouping
-    summarize(score = mean(score, na.rm = TRUE)) %>% 
+    summarize(score = mean(score, na.rm = TRUE), 
+              n = n()) %>% 
     ungroup()
 ```
 
@@ -485,8 +485,8 @@ Which we can pass right along to *ggplot2* for the finish:
 ```{r, eval=TRUE}
 ## plot data
 long_emotion_ts %>%
-    ggplot(aes(x = created_at, y = score, color = query, alpha = .75)) + 
-    geom_point() + 
+    ggplot(aes(x = created_at, y = score, color = query)) + 
+    geom_point(aes(size = n)) + 
     geom_smooth(method = "loess") + 
     facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
     theme_bw() + 
@@ -496,7 +496,7 @@ long_emotion_ts %>%
           axis.text = element_text(size = 9),
           legend.title = element_blank()) + 
     labs(x = NULL, y = NULL, 
-         title = "Sentiment analysis of tweets over time",
+         title = "Sentiment analysis of Twitter statuses over time",
          subtitle = "Tweets aggregated by hour on topics of the CBO and North Korea") +
     scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
 ```

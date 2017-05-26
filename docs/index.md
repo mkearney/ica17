@@ -1,6 +1,7 @@
 Introduction to rtweet: Collecting Twitter data
 ================
-Michael W. Kearney University of Kansas
+Michael W. Kearney
+May 25, 2017
 
 -   [Getting started with Twitter data](#getting-started-with-twitter-data)
     -   [Installing rtweet](#installing-rtweet)
@@ -434,14 +435,15 @@ long_emotion_ts <- df %>%
     ## select variables (columns) of interest
     dplyr::select(created_at, query, anger:positive) %>%
     ## convert created_at variable to desired interval 
-    ## here I chose hours (60 seconds * 60 mins = 1 hour)
-    mutate(created_at = round_time(created_at, 60 * 60)) %>%
+    ## here I chose 6 hour intervals (3 * 60 seconds * 60 mins = 3 hours)
+    mutate(created_at = round_time(created_at, 3 * 60 * 60)) %>%
     ## transform data to long form
     tidyr::gather(sentiment, score, -created_at, -query) %>%
     ## group by time, query, and sentiment
     group_by(created_at, query, sentiment) %>%
     ## get mean for each grouping
-    summarize(score = mean(score, na.rm = TRUE)) %>% 
+    summarize(score = mean(score, na.rm = TRUE), 
+              n = n()) %>% 
     ungroup()
 ```
 
@@ -452,28 +454,28 @@ The result is a tidy data paradise:
 long_emotion_ts
 ```
 
-    ## # A tibble: 720 x 4
-    ##             created_at           query    sentiment     score
-    ##                 <dttm>           <chr>        <chr>     <dbl>
-    ##  1 2017-08-06 07:00:00 CBO health care        anger 0.1428571
-    ##  2 2017-08-06 07:00:00 CBO health care anticipation 1.2857143
-    ##  3 2017-08-06 07:00:00 CBO health care      disgust 0.0000000
-    ##  4 2017-08-06 07:00:00 CBO health care         fear 0.1428571
-    ##  5 2017-08-06 07:00:00 CBO health care          joy 1.0000000
-    ##  6 2017-08-06 07:00:00 CBO health care     negative 0.0000000
-    ##  7 2017-08-06 07:00:00 CBO health care     positive 1.8571429
-    ##  8 2017-08-06 07:00:00 CBO health care      sadness 0.0000000
-    ##  9 2017-08-06 07:00:00 CBO health care     surprise 1.0000000
-    ## 10 2017-08-06 07:00:00 CBO health care        trust 0.1428571
-    ## # ... with 710 more rows
+    ## # A tibble: 250 x 5
+    ##             created_at           query    sentiment      score     n
+    ##                 <dttm>           <chr>        <chr>      <dbl> <int>
+    ##  1 2019-03-29 07:00:00 CBO health care        anger 0.13043478    23
+    ##  2 2019-03-29 07:00:00 CBO health care anticipation 1.30434783    23
+    ##  3 2019-03-29 07:00:00 CBO health care      disgust 0.08695652    23
+    ##  4 2019-03-29 07:00:00 CBO health care         fear 0.26086957    23
+    ##  5 2019-03-29 07:00:00 CBO health care          joy 0.86956522    23
+    ##  6 2019-03-29 07:00:00 CBO health care     negative 0.21739130    23
+    ##  7 2019-03-29 07:00:00 CBO health care     positive 1.43478261    23
+    ##  8 2019-03-29 07:00:00 CBO health care      sadness 0.08695652    23
+    ##  9 2019-03-29 07:00:00 CBO health care     surprise 0.82608696    23
+    ## 10 2019-03-29 07:00:00 CBO health care        trust 0.21739130    23
+    ## # ... with 240 more rows
 
 Which we can pass right along to *ggplot2* for the finish:
 
 ``` r
 ## plot data
 long_emotion_ts %>%
-    ggplot(aes(x = created_at, y = score, color = query, alpha = .75)) + 
-    geom_point() + 
+    ggplot(aes(x = created_at, y = score, color = query)) + 
+    geom_point(aes(size = n)) + 
     geom_smooth(method = "loess") + 
     facet_wrap(~ sentiment, scale = "free_y", nrow = 2) + 
     theme_bw() + 
@@ -483,7 +485,7 @@ long_emotion_ts %>%
           axis.text = element_text(size = 9),
           legend.title = element_blank()) + 
     labs(x = NULL, y = NULL, 
-         title = "Sentiment analysis of tweets over time",
+         title = "Sentiment analysis of Twitter statuses over time",
          subtitle = "Tweets aggregated by hour on topics of the CBO and North Korea") +
     scale_x_datetime(date_breaks = "18 hours", date_labels = "%b %d")
 ```
